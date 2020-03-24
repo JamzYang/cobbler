@@ -46,13 +46,28 @@ public class Cobbler {
     }
 
     public Elements getCommentsBlock(File file) throws IOException {
+        JSONObject jsonOb = new JSONObject();
+        jsonOb.put("aid", "209108");
+        jsonOb.put("prev", "0");
+        String jsonStr = jsonOb.toJSONString();
+        String baseUrl = "https://time.geekbang.org/column/article/209108";
+        Header[] headers = httpGet(baseUrl);
+        String responseStr = HttpPostWithJson("https://time.geekbang.org/serv/v1/comments", jsonStr, baseUrl, headers);
+        JSONObject jsonObject = JSONObject.parseObject(responseStr);
+        JSONArray jsonArray = jsonObject.getJSONObject("data").getJSONArray("list");
+//                jsonArray.
+        List<Comment> comments = jsonArray.toJavaList(Comment.class);
+        comments.forEach(comment1 -> {
+            String comment_content = comment1.getComment_content();
+            System.out.println();
+        });
+
         Document doc = Jsoup.parse(file, "utf-8");
         Elements base = doc.select("head>base");
         //https://time.geekbang.org/column/article/83598
         String articleId = base.attr("href").substring(41);
         String prev = "";
         Elements elements = doc.select(".iconfont");
-        //            element.getElementsMatchingText(new Pattern())
         elements.stream().map(element -> element.getElementsContainingText("写留言")).filter(e1 -> e1.size() > 0).forEach(e1 -> {
             Elements next = e1.next();
             while (!next.is("ul")) {
@@ -61,35 +76,42 @@ public class Cobbler {
             Elements lis = next.select("li");
             lis.forEach(li -> {
 //                    Elements div = li.select("div");
+//                comments.forEach(comment1 -> {
+//                    String comment_content = comment1.getComment_content();
+//                    System.out.println();
+//                });
+                Comment comment1 = comments.get(0);
                 Element avatarImg = li.child(0);
+                avatarImg.attr("src",comment1.getUser_header());
                 Element commentBlock = li.child(1);
-                Element nickName = commentBlock.child(0);
+                Element nickNameEle = commentBlock.child(0);
+                Elements nickNameSpan = nickNameEle.select("span");
+                //TODO 评论时间暂没修改
+                nickNameSpan.html(comment1.getUser_name());
                 Element comment = commentBlock.child(1);
-                Element reply1 = commentBlock.child(2);
-//                    Element reply = commentBlock.child(3);
-                System.out.println("div");
-//                    String json = "{aid:\""+articleId+"\", prev:\""+prev+"\"}";
-                JSONObject jsonOb = new JSONObject();
-                jsonOb.put("aid", "209108");
-                jsonOb.put("prev", "0");
-                String jsonStr = jsonOb.toJSONString();
-                String baseUrl = "https://time.geekbang.org/column/article/209108";
-                Header[] headers = httpGet(baseUrl);
-                String responseStr = HttpPostWithJson("https://time.geekbang.org/serv/v1/comments", jsonStr, baseUrl, headers);
-                JSONObject jsonObject = JSONObject.parseObject(responseStr);
-                JSONArray jsonArray = jsonObject.getJSONObject("data").getJSONArray("list");
-//                jsonArray.
-                List<Comment> comments = jsonArray.toJavaList(Comment.class);
-                comments.forEach(comment1 -> {
-                    String comment_content = comment1.getComment_content();
-                    System.out.println();
-                });
+                comment.html(comment1.getComment_content());
 
-//                    doPost("https://time.geekbang.org/serv/v1/comments", jsonStr, "utf-8");
+//                Element reply1 = commentBlock.child(2);
+                //TODO 作者回复
+/*                Element reply = commentBlock.child(3);
+                List<Replay> replies = comment1.getReplies();
+                replies.forEach(replay -> {
+
+                });
+                reply.select("p").html("作者: "+comment1.getReplies().get(0).getContent());
+                System.out.println("div");*/
             });
             System.out.println(e1);
         });
         System.out.println();
+
+        File file1 = new File("src/test/resources/src_articles/aa.html");
+        if(!file1.exists()){
+            file1.createNewFile();
+        }
+        FileOutputStream fos = new FileOutputStream(file1, false);
+        OutputStreamWriter osw = new OutputStreamWriter(fos, "utf-8");
+        osw.write(doc.html());
         return elements;
     }
 

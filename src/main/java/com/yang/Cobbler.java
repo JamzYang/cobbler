@@ -1,5 +1,6 @@
 package com.yang;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.http.Header;
@@ -76,8 +77,13 @@ public class Cobbler {
                 Header[] headers = httpGet(baseUrl);
                 String responseStr = HttpPostWithJson("https://time.geekbang.org/serv/v1/comments", jsonStr, baseUrl, headers);
                 JSONObject jsonObject = JSONObject.parseObject(responseStr);
-                Object data = jsonObject.get("data");
-                System.out.println();
+                JSONArray jsonArray = jsonObject.getJSONObject("data").getJSONArray("list");
+//                jsonArray.
+                List<Comment> comments = jsonArray.toJavaList(Comment.class);
+                comments.forEach(comment1 -> {
+                    String comment_content = comment1.getComment_content();
+                    System.out.println();
+                });
 
 //                    doPost("https://time.geekbang.org/serv/v1/comments", jsonStr, "utf-8");
             });
@@ -119,7 +125,7 @@ public class Cobbler {
         String jsonStr = jsonOb.toJSONString();
         String returnValue = "这是默认返回值，接口调用失败";
         CloseableHttpClient httpClient = HttpClients.createDefault();
-        ResponseHandler<String> responseHandler = new BasicResponseHandler();
+//        ResponseHandler<String> responseHandler = new BasicResponseHandler();
         try {
             //第一步：创建HttpClient对象
             httpClient = HttpClients.createDefault();
@@ -141,7 +147,11 @@ public class Cobbler {
             httpPost.addHeader("Cookie",cookie);*/
             httpPost.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:50.0) Gecko/20100101 Firefox/50.0");
             //第四步：发送HttpPost请求，获取返回值
-            returnValue = httpClient.execute(httpPost, responseHandler);//调接口获取返回值时，必须用此方法
+            CloseableHttpResponse response = httpClient.execute(httpPost);//调接口获取返回值时，必须用此方法
+            if(response !=null){
+                HttpEntity entity = response.getEntity();
+                returnValue = EntityUtils.toString(entity, "utf-8");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

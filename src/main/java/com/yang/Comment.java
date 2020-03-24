@@ -16,6 +16,12 @@ public class Comment {
     private String can_delete;
     private String user_name;
     private String product_type;
+    private String uid;
+    private String discussion_count;
+    private String ucode;
+    private String score;
+    private String comment_content;
+    private String like_count;
     private List<Replay> replies;
 
     public Comment() {
@@ -99,5 +105,53 @@ public class Comment {
 
     public void setReplies(List<Replay> replies) {
         this.replies = replies;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public String getDiscussion_count() {
+        return discussion_count;
+    }
+
+    public void setDiscussion_count(String discussion_count) {
+        this.discussion_count = discussion_count;
+    }
+
+    public String getUcode() {
+        return ucode;
+    }
+
+    public void setUcode(String ucode) {
+        this.ucode = ucode;
+    }
+
+    public String getScore() {
+        return score;
+    }
+
+    public void setScore(String score) {
+        this.score = score;
+    }
+
+    public String getComment_content() {
+        return comment_content;
+    }
+
+    public void setComment_content(String comment_content) {
+        this.comment_content = comment_content;
+    }
+
+    public String getLike_count() {
+        return like_count;
+    }
+
+    public void setLike_count(String like_count) {
+        this.like_count = like_count;
     }
 }

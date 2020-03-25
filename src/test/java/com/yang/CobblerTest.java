@@ -2,8 +2,8 @@ package com.yang;
 
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
-
 import static org.junit.Assert.*;
 
 /**
@@ -13,10 +13,16 @@ import static org.junit.Assert.*;
 public class CobblerTest {
 
     @Test
-    public void getLocalArticles() throws IOException {
+    public void getLocalArticleList() throws IOException {
         Cobbler cobbler = new Cobbler();
-        cobbler.getLocalArticles("src/test/resources/src_articles");
-//        String s = cobbler.httpGet("https://time.geekbang.org/column/article/209108");
-        System.out.println();
+        File[] articleList = cobbler.getLocalArticleList("src/test/resources/src_articles");
+        assertEquals(1,articleList.length);
     }
+
+    @Test
+    public void processTest() throws IOException {
+        Cobbler cobbler = new Cobbler();
+        cobbler.process();
+    }
+
 }

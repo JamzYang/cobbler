@@ -1,3 +1,11 @@
 # Project exclude paths
 /target/
 /.idea/
+cobbler.iml
+src/main/java/us/
+src/main/resources/
+src/test/java/com/yang/GithubRepoPageProcessor.java
+
+src/test/resources/tar_articles/
+src/test/resources/src_articles/
+

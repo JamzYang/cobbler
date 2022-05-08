@@ -1,20 +1,20 @@
 package com.yang;
 
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
-import org.slf4j.LoggerFactory;
+
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import static com.yang.HttpUtil.postJson;
 
@@ -22,8 +22,8 @@ import static com.yang.HttpUtil.postJson;
  * @author yang
  * Date 2020/3/24 15:55
  */
+@Log4j2
 public class Cobbler {
-    private Log log = LogFactory.getLog(Cobbler.class);
     private Document doc;
     private String articleUrl;
     private String articleId;
@@ -41,6 +41,7 @@ public class Cobbler {
                 File article = articleList[i];
                 this.articleName = article.getName();
                 loadArticle(article);
+                parseContent(doc);
                 Elements commentListElement = getCommentListElement(doc);
                 createStdCommentBlock(commentListElement);
 
@@ -68,6 +69,7 @@ public class Cobbler {
     //1.载入文章
     private void loadArticle(File article) throws IOException {
         log.debug("解析文章:  "+article.getName());
+
         this.doc = Jsoup.parse(article, "utf-8");
         //文章链接 存于<head> <base>标签内
         Elements base = doc.select("head>base");
@@ -76,6 +78,66 @@ public class Cobbler {
         this.articleId = articleUrl.substring(41);
     }
 
+    private static String dataSlateString = "data-slate-string"; //true
+    private static String dateSlateObject = "data-slate-object"; //text 文本  //mark  标记
+    private static String dataSlateType = "data-slate-type"; //bold 加粗
+
+    private JSONObject parseContent(Document doc){
+        Element app = doc.body().getElementById("app");
+        Elements select = app.select("[data-slate-editor=true], [autocorrect=off]");
+        System.out.println();
+        if(select.size()  != 1){
+            throw new RuntimeException("正文未识别");
+        }
+        Element element = select.get(0);
+        List<Node> nodes = element.childNodes();
+        for (Node node : nodes) {
+            List<Node> nodes1 = node.childNodes();
+            for (Node node1 : nodes1) {
+                if( node1.hasAttr("data-slate-object")){
+                    StringBuilder grafString = new StringBuilder();
+                   if("text".equals(node1.attr("data-slate-object"))) {
+//                       node1.
+                       List<Node> nodes2 = node1.childNodes();
+                       for (Node node2 : nodes2) {
+                           if (node2.hasAttr("data-slate-leaf")) {
+                               List<Node> nodes3 = node2.childNodes();
+                               for (Node node3 : nodes3) {
+                                   if (node3.hasAttr("data-slate-string")) {
+                                       List<Node> nodes4 = node3.childNodes();
+                                       for (Node node4 : nodes4) {
+                                           if (node4 instanceof TextNode) {
+                                               TextNode textNode = (TextNode) node4;
+                                               String wholeText = textNode.getWholeText();
+                                               grafString.append(wholeText);
+                                           }
+                                       }
+                                   }
+
+                               }
+
+                           }
+                       }
+                   }else if("block".equals(node1.attr("data-slate-object"))){
+
+                   }else {
+                       throw new RuntimeException("行内文本未识别");
+                   }
+                   log.info("段落内容： {}",grafString.toString());
+                }
+
+            }
+            System.out.println();
+        }
+        String type = select.attr("data-slate-type");
+        if("paragraph".equals(type)){
+
+        }else {
+            throw new RuntimeException("块未识别： ");
+        }
+//        select.s
+        return null;
+    }
     //2.查找评论列表标签
     // li > img(头像)
     //    > div(评论框)
@@ -89,6 +151,10 @@ public class Cobbler {
     //      > div > span 展开   ~ i class= iconfont
     //      > div(作者回复) > p 回复内容
     private Elements getCommentListElement(Document doc) {
+        if(true){
+            throw new RuntimeException("test");
+
+        }
         log.debug("开始从Dom树中查找评论框...");
         long start = System.currentTimeMillis();
         Elements elements = doc.select(".iconfont");
@@ -190,14 +256,28 @@ public class Cobbler {
         JSONObject jsonOb = new JSONObject();
         jsonOb.put("aid", articleId);
         jsonOb.put("prev", "0");
-        String jsonParam = jsonOb.toJSONString();
-        JSONObject resJson = JSONObject.parseObject(postJson(commentsUrl, jsonParam, articleUrl));
-        List<Comment> commentList = resJson.getJSONObject("data")
-                .getJSONArray("list")
-                .toJavaList(Comment.class);
+        List<Comment> commentList = doGetComments(jsonOb);
+        log.info("ping lun :  {}", JSON.toJSONString(commentList));
         long end = System.currentTimeMillis();
         log.debug("耗时: "+ (end-start)/1000.0 +"秒.");
         log.debug("评论信息已抓取: "+ commentList.size() +"条.\t 耗时: "+ (end-start)/1000.0 +"秒.");
+        return commentList;
+    }
+
+    private List<Comment> doGetComments(JSONObject jsonOb) {
+        String jsonParam = jsonOb.toJSONString();
+        JSONObject resJson = JSONObject.parseObject(postJson(commentsUrl, jsonParam, articleUrl));
+        JSONObject data = resJson.getJSONObject("data");
+        List<Comment> commentList = new ArrayList<>(data.getJSONArray("list").toJavaList(Comment.class));
+        boolean hasMore = data.getJSONObject("page").getBoolean("more");
+        while(hasMore){
+            jsonOb.put("prev",commentList.get(commentList.size() - 1).getScore());
+            jsonParam = jsonOb.toJSONString();
+            resJson = JSONObject.parseObject(postJson(commentsUrl, jsonParam, articleUrl));
+            data = resJson.getJSONObject("data");
+            commentList.addAll(data.getJSONArray("list").toJavaList(Comment.class));
+            hasMore = data.getJSONObject("page").getBoolean("more");
+        }
         return commentList;
     }
 

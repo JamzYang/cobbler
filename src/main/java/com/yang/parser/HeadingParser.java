@@ -2,6 +2,7 @@ package com.yang.parser;
 
 import com.alibaba.fastjson.JSONObject;
 import com.yang.EnumAttr;
+import com.yang.SelectUtil;
 import lombok.Setter;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -24,7 +25,7 @@ public class HeadingParser extends BlockParser{
         Elements h2 = element.select("h2");
         if(h2.hasAttr(EnumAttr.HEADING.getAttr())){
 
-            Elements select = h2.select(String.format("[%s=%s]", EnumAttr.OBJECT_TEXT.getAttr(), EnumAttr.OBJECT_TEXT.getValue()));
+            Elements select = h2.select(SelectUtil.OBJECT_TEXT);
             for (Element element1 : select) {
                 ObjectTextParser objectTextParser = new ObjectTextParser();
                 String text = objectTextParser.parseText(element1);

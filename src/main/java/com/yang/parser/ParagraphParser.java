@@ -1,9 +1,11 @@
 package com.yang.parser;
 
 import com.alibaba.fastjson.JSONObject;
+import com.yang.SelectUtil;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
+import org.jsoup.select.Elements;
 
 import java.util.List;
 
@@ -21,28 +23,13 @@ public class ParagraphParser extends BlockParser{
 
         JSONObject jsonObject = new JSONObject();
         StringBuilder contentBuilder = new StringBuilder();
-        List<Node> nodes = element.childNodes();
-        for (Node node : nodes) {
-            if(node.hasAttr(dataSlateObject)) {
-                List<Node> nodes1 = node.childNodes();
-                for (Node node1 : nodes1) {
-                    if(node1.hasAttr(dataSlateLeaf)){
-                        List<Node> nodes2 = node1.childNodes();
-                        for (Node node2 : nodes2) {
-                            if(node2.hasAttr(dataSlateString)){
-                                List<Node> nodes3 = node2.childNodes();
-                                for (Node node3 : nodes3) {
-                                    if(node3 instanceof TextNode){
-                                        TextNode textNode = (TextNode) node3;
-                                        contentBuilder.append(textNode.getWholeText());
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        Elements select = element.select(SelectUtil.OBJECT_TEXT);
+        for (Element element1 : select) {
+            ObjectTextParser objectTextParser = new ObjectTextParser();
+            String text = objectTextParser.parseText(element1);
+            contentBuilder.append(text);
         }
+
 
         jsonObject.put("content",contentBuilder.toString());
         return jsonObject;

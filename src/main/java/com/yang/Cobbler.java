@@ -1,16 +1,12 @@
 package com.yang;
 
 import com.alibaba.fastjson.JSONObject;
+import com.yang.parser.BlockParser;
 import com.yang.parser.CommentsBuilder;
-import com.yang.parser.HeadingParser;
-import com.yang.parser.ImageParser;
-import com.yang.parser.ListParser;
-import com.yang.parser.ParagraphParser;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
@@ -31,37 +27,30 @@ import static com.yang.HttpUtil.postJson;
  */
 @Log4j2
 public class Cobbler {
-    private Document doc;
-    private String articleUrl;
-    private String articleId;
-    private String commentsUrl = "https://time.geekbang.org/serv/v1/comments";
-    private String srcDir = "src/test/resources/src_articles";
-    private String tarDir = "src/test/resources/tar_articles";
-    private String articleName;
-
 
     public void process() {
         try {
+            String srcDir = "src/test/resources/src_articles";
             File[] articleList = getLocalArticleList(srcDir);
             for (int i = 0; i < articleList.length; i++) {
-                File article = articleList[i];
-                this.articleName = article.getName();
-                loadArticle(article);
-                StringBuilder contentSB = parseContent(doc);
+                File articleFile = articleList[i];
+                String articleName = articleFile.getName();
+                Article article = loadFile(articleFile);
+                parseContent(article);
 
-                List<Comment> commentList = grabComments();
+                List<Comment> commentList = grabComments(article);
                 CommentsBuilder commentsBuilder = new CommentsBuilder();
                 StringBuilder comments = commentsBuilder.build(commentList);
-                contentSB.append(comments);
-                System.out.println(contentSB.toString());
+                article.setComments(comments);
 
-                File tarArticle = new File(this.tarDir + "/" + this.articleName);
+                String tarDir = "src/test/resources/tar_articles";
+                File tarArticle = new File(tarDir + "/" + articleName);
                 if (!tarArticle.exists()) {
                     tarArticle.createNewFile();
                 }
                 FileOutputStream fos = new FileOutputStream(tarArticle, false);
                 OutputStreamWriter osw = new OutputStreamWriter(fos, "utf-8");
-                osw.write(doc.html());
+//                osw.write(doc.html());
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -72,19 +61,20 @@ public class Cobbler {
 
 
     //1.载入文章
-    private void loadArticle(File article) throws IOException {
-        log.debug("解析文章:  " + article.getName());
-
-        this.doc = Jsoup.parse(article, "utf-8");
+    private Article loadFile(File file) throws IOException {
+        Article article = new Article();
+        log.debug("解析文章:  " + file.getName());
+        article.setDoc( Jsoup.parse(file, "utf-8"));
         //文章链接 存于<head> <base>标签内
-        Elements base = doc.select("head>base");
+        Elements base = article.getDoc().select("head>base");
         //https://time.geekbang.org/column/article/83598
-        this.articleUrl = base.attr("href");
-        this.articleId = articleUrl.substring(41);
+        article.setArticleUrl( base.attr("href"));
+        article.setArticleId(article.getArticleUrl().substring(41));
+        return article;
     }
 
-    private StringBuilder parseContent(Document doc) {
-        Element app = doc.body().getElementById("app");
+    private void  parseContent(Article article) {
+        Element app = article.getDoc().body().getElementById("app");
         Elements contentsElements = app.select("[data-slate-editor=true], [autocorrect=off]");
         if (contentsElements.size() != 1) {
             throw new RuntimeException("正文未识别");
@@ -93,39 +83,23 @@ public class Cobbler {
         Element contentElement = contentsElements.get(0);
         Elements blockElements = contentElement.children();
         for (Element blockElement : blockElements) {
-            if (blockElement.is(SelectUtil.PARAGRAPH)) {
-                ParagraphParser paragraphParser = new ParagraphParser();
-                JSONObject parse = paragraphParser.parse(blockElement);
-                list.add(parse);
-            }else if(blockElement.is(SelectUtil.H2)){
-                HeadingParser headingParser = new HeadingParser();
-                JSONObject parse = headingParser.parse(blockElement);
-                list.add(parse);
-            }else if(blockElement.is(SelectUtil.LIST)){
-                ListParser listParser = new ListParser();
-                list.add(listParser.parse(blockElement));
-            }else if(blockElement.is(SelectUtil.IMAGE)){
-                ImageParser imageParser = new ImageParser();
-                list.add(imageParser.parse(blockElement));
-            }else {
-                throw new RuntimeException("未识别的 block");
-            }
+            BlockParser blockParser = BlockParser.createBlockParser(blockElement);
+            list.add(blockParser.parse());
         }
         StringBuilder contentSB = new StringBuilder();
         list.forEach(item -> contentSB.append(item.getString("content")));
-//        select.s
-        return contentSB;
+        article.setContent(contentSB);
     }
 
 
     //post 抓取评论信息
-    private List<Comment> grabComments() {
+    private List<Comment> grabComments(Article article) {
         log.debug("开始抓取评论信息...");
         long start = System.currentTimeMillis();
         JSONObject jsonOb = new JSONObject();
-        jsonOb.put("aid", articleId);
+        jsonOb.put("aid", article.getArticleId());
         jsonOb.put("prev", "0");
-        List<Comment> commentList = doGetComments(jsonOb);
+        List<Comment> commentList = doGetComments(jsonOb, article);
         System.out.println(JSONObject.toJSONString(commentList));
         long end = System.currentTimeMillis();
         log.debug("耗时: " + (end - start) / 1000.0 + "秒.");
@@ -133,9 +107,10 @@ public class Cobbler {
         return commentList;
     }
 
-    private List<Comment> doGetComments(JSONObject jsonOb) {
+    private List<Comment> doGetComments(JSONObject jsonOb, Article article) {
         String jsonParam = jsonOb.toJSONString();
-        String respResult = postJson(commentsUrl, jsonParam, articleUrl);
+        String commentsUrl = "https://time.geekbang.org/serv/v1/comments";
+        String respResult = postJson(commentsUrl, jsonParam, article.getArticleUrl());
         if(StringUtils.isBlank(respResult)){
             throw new RuntimeException("获取评论信息失败");
         }

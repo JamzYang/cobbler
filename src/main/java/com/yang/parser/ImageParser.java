@@ -2,6 +2,7 @@ package com.yang.parser;
 
 import com.alibaba.fastjson.JSONObject;
 import com.yang.EnumAttr;
+import lombok.NoArgsConstructor;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
@@ -10,14 +11,18 @@ import org.jsoup.select.Elements;
  * @description
  * @date 2022/5/9 2:35 上午
  */
+@NoArgsConstructor
 public class ImageParser extends BlockParser{
-    private static String dataSavepageSrc = "data-savepage-src";
+    public ImageParser(Element blockElement) {
+        super(blockElement);
+    }
+
     @Override
-    public JSONObject parse(Element element) {
+    public JSONObject parse() {
         JSONObject jsonObject = new JSONObject();
         StringBuilder contentBuilder = new StringBuilder();
        contentBuilder.append("![alt](");
-        Elements img = element.select("img");
+        Elements img = getBlockElement().select("img");
         if(img.hasAttr(EnumAttr.IMAGE_SRC.getAttr())){
             String src = img.attr(EnumAttr.IMAGE_SRC.getAttr());
             contentBuilder.append(src).append(")").append("\n");

@@ -2,6 +2,7 @@ package com.yang.parser;
 
 import com.alibaba.fastjson.JSONObject;
 import com.yang.EnumAttr;
+import lombok.NoArgsConstructor;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
@@ -13,14 +14,17 @@ import java.util.List;
  * @description
  * @date 2022/5/9 2:34 上午
  */
+@NoArgsConstructor
 public class ObjectMarkParser extends TextParser{
-
+    public ObjectMarkParser(Element textElement) {
+        super(textElement);
+    }
 
     @Override
-    public JSONObject parse(Element element) {
+    public JSONObject parse() {
         JSONObject jsonObject = new JSONObject();
         StringBuilder contentBuilder = new StringBuilder();
-        List<Node> nodes = element.childNodes();
+        List<Node> nodes = getTextElement().childNodes();
         for (Node node1 : nodes) {
 //            if(node.hasAttr(EnumAttr.OBJECT_TEXT.getAttr())) {
 //                List<Node> nodes1 = node.childNodes();

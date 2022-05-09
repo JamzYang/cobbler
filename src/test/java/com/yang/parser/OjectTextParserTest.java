@@ -1,6 +1,5 @@
 package com.yang.parser;
 
-import com.alibaba.fastjson.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -29,8 +28,8 @@ public class OjectTextParserTest {
         Document document = Jsoup.parseBodyFragment(testString);
         Element body = document.body();
         Elements children = body.children();
-        ObjectTextParser textParser = new ObjectTextParser();
-        String text = textParser.parseText(children.get(0));
+        ObjectTextParser textParser = new ObjectTextParser(children.get(0));
+        String text = textParser.parseText();
 
         assertEquals("段落内容解析错误",result,text);
     }

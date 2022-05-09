@@ -29,8 +29,8 @@ public class ParagraphParserTest {
         Document document = Jsoup.parseBodyFragment(testString);
         Element body = document.body();
         Elements children = body.children();
-        ParagraphParser paragraphParser = new ParagraphParser();
-        JSONObject parse = paragraphParser.parse(children.get(0));
+        ParagraphParser paragraphParser = new ParagraphParser(children.get(0));
+        JSONObject parse = paragraphParser.parse();
 
         parse.getString("content");
         assertEquals("段落内容解析错误",result,parse.getString("content"));
@@ -64,8 +64,8 @@ public class ParagraphParserTest {
         Document document = Jsoup.parseBodyFragment(testString);
         Element body = document.body();
         Elements children = body.children();
-        ParagraphParser paragraphParser = new ParagraphParser();
-        JSONObject parse = paragraphParser.parse(children.get(0));
+        ParagraphParser paragraphParser = new ParagraphParser(children.get(0));
+        JSONObject parse = paragraphParser.parse();
 
         parse.getString("content");
         assertEquals("段落内容解析错误",result,parse.getString("content"));
@@ -79,8 +79,8 @@ public class ParagraphParserTest {
         Document document = Jsoup.parseBodyFragment(testString);
         Element body = document.body();
         Elements children = body.children();
-        ParagraphParser paragraphParser = new ParagraphParser();
-        JSONObject parse = paragraphParser.parse(children.get(0));
+        ParagraphParser paragraphParser = new ParagraphParser(children.get(0));
+        JSONObject parse = paragraphParser.parse();
 
         parse.getString("content");
         assertEquals("段落内容解析错误",result,parse.getString("content"));

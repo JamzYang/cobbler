@@ -19,11 +19,11 @@ public class HeadingParserTest {
                 "        </span>\n" +
                 "    </span>\n" +
                 "</h2>";
-        BlockParser parser = new HeadingParser();
         Document document = Jsoup.parseBodyFragment(body);
         Element body1 = document.body();
+        BlockParser parser = new HeadingParser(body1);
 
-        JSONObject parse = parser.parse(body1);
+        JSONObject parse = parser.parse();
         parse.getString("content");
         assertEquals("二级标题解析错误",result,parse.getString("content"));
         System.out.println();

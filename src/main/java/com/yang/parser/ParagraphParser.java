@@ -2,33 +2,34 @@ package com.yang.parser;
 
 import com.alibaba.fastjson.JSONObject;
 import com.yang.SelectUtil;
+import lombok.NoArgsConstructor;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
-import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
-
-import java.util.List;
 
 /**
  * @author yangshen47
  * @description
  * @date 2022/5/9 2:34 上午
  */
+@NoArgsConstructor
 public class ParagraphParser extends BlockParser{
-    private static String dataSlateString = "data-slate-string";
-    private static String dataSlateObject = "data-slate-object";
-    private static String dataSlateLeaf = "data-slate-leaf";
+
+    public ParagraphParser(Element blockElement) {
+       super(blockElement);
+    }
+
+
     @Override
-    public JSONObject parse(Element element) {
+    public JSONObject parse() {
 
         JSONObject jsonObject = new JSONObject();
         StringBuilder contentBuilder = new StringBuilder();
-        Elements select = element.select(SelectUtil.OBJECT_TEXT);
+        Elements select = getBlockElement().select(SelectUtil.OBJECT_TEXT);
         for (Element element1 : select) {
             try {
 
-                ObjectTextParser objectTextParser = new ObjectTextParser();
-                String text = objectTextParser.parseText(element1);
+                ObjectTextParser objectTextParser = new ObjectTextParser(element1);
+                String text = objectTextParser.parseText();
                 boolean doubleStarEnd = (contentBuilder.length() > 2 && "**".equals(contentBuilder.substring(contentBuilder.length()-2, contentBuilder.length())));
                 boolean doubleStarStart = (text.length() > 2 && "**".equals(text.substring(0, 2)));
                 if(doubleStarEnd && doubleStarStart){

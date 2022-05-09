@@ -39,8 +39,8 @@ public class ListParserTest {
         Document document = Jsoup.parseBodyFragment(testString);
         Element body = document.body();
         Elements children = body.children();
-        BlockParser listParser = new ListParser();
-        JSONObject parse = listParser.parse(children.get(0));
+        BlockParser listParser = new ListParser(children.get(0));
+        JSONObject parse = listParser.parse();
 
         parse.getString("content");
         assertEquals("无序列表内容解析错误",result,parse.getString("content"));

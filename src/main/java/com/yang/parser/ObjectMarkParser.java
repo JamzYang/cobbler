@@ -13,7 +13,7 @@ import java.util.List;
  * @description
  * @date 2022/5/9 2:34 上午
  */
-public class ObjectTextParser  extends TextParser{
+public class ObjectMarkParser extends TextParser{
 
 
     @Override
@@ -40,7 +40,6 @@ public class ObjectTextParser  extends TextParser{
                                 List<Node> nodes3 = node2.childNodes();
                                 for (Node node4 : nodes3) {
                                     if(node4.hasAttr(EnumAttr.STRING.getAttr())){
-                                        contentBuilder.append("**");
                                         List<Node> nodes4 = node4.childNodes();
                                         for (Node node3 : nodes4) {
                                             if(node3 instanceof TextNode){
@@ -48,7 +47,6 @@ public class ObjectTextParser  extends TextParser{
                                                 contentBuilder.append(textNode.getWholeText());
                                             }
                                         }
-                                        contentBuilder.append("**");
                                     }
                                 }
                             }

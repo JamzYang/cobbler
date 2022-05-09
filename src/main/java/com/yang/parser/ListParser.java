@@ -31,6 +31,7 @@ public class ListParser extends BlockParser{
                 contentBuilder.append(text).append("\n");
             }
         }
+        contentBuilder.append("\n");
         jsonObject.put("content",contentBuilder.toString());
         return jsonObject;
     }

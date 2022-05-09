@@ -33,6 +33,7 @@ public class HeadingParser extends BlockParser{
             }
 
         }
+        contentBuilder.append("\n");
         jsonObject.put("content",contentBuilder.toString());
         return jsonObject;
     }

@@ -15,7 +15,6 @@ import java.util.List;
  */
 public class ObjectTextParser  extends TextParser{
 
-
     @Override
     public JSONObject parse(Element element) {
         JSONObject jsonObject = new JSONObject();
@@ -40,7 +39,10 @@ public class ObjectTextParser  extends TextParser{
                                 List<Node> nodes3 = node2.childNodes();
                                 for (Node node4 : nodes3) {
                                     if(node4.hasAttr(EnumAttr.STRING.getAttr())){
-                                        contentBuilder.append("**");
+                                        boolean boldStart = contentBuilder.length() < 2 || (contentBuilder.length() > 2 && !"**".equals(contentBuilder.substring(contentBuilder.length()-2, contentBuilder.length())));
+                                        if(boldStart){
+                                            contentBuilder.append("**");
+                                        }
                                         List<Node> nodes4 = node4.childNodes();
                                         for (Node node3 : nodes4) {
                                             if(node3 instanceof TextNode){
@@ -48,7 +50,9 @@ public class ObjectTextParser  extends TextParser{
                                                 contentBuilder.append(textNode.getWholeText());
                                             }
                                         }
-                                        contentBuilder.append("**");
+                                        if(contentBuilder.length() > 2 && !"**".equals(contentBuilder.substring(contentBuilder.length()-2, contentBuilder.length()))){
+                                            contentBuilder.append("**");
+                                        }
                                     }
                                 }
                             }
@@ -60,5 +64,15 @@ public class ObjectTextParser  extends TextParser{
 
         jsonObject.put("content",contentBuilder.toString());
         return jsonObject;
+    }
+
+    public static void main(String[] args) {
+        StringBuilder contentBuilder = new StringBuilder("**好吧**");
+        String lastChar = contentBuilder.substring(contentBuilder.length() - 2, contentBuilder.length());
+        if(!"**".equals(contentBuilder.substring(contentBuilder.length()-2, contentBuilder.length()))){
+            contentBuilder.append("**");
+        }
+        String substring = contentBuilder.substring(0, 2);
+        System.out.println();
     }
 }

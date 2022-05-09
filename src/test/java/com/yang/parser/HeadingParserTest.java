@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 public class HeadingParserTest {
     @Test
     public void testParseHeading(){
-        String result = "### 核心的模型";
+        String result = "### 核心的模型\n";
         String body = "<h2 class=\"se-7b8aeef3\" data-slate-type=\"heading\" data-slate-object=\"block\" data-key=\"678\">\n" +
                 "    <span data-slate-object=\"text\" data-key=\"679\">\n" +
                 "        <span data-slate-leaf=\"true\" data-offset-key=\"679:0\" data-first-offset=\"true\">\n" +

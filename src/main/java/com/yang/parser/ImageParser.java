@@ -20,7 +20,7 @@ public class ImageParser extends BlockParser{
         Elements img = element.select("img");
         if(img.hasAttr(EnumAttr.IMAGE_SRC.getAttr())){
             String src = img.attr(EnumAttr.IMAGE_SRC.getAttr());
-            contentBuilder.append(src).append(")");
+            contentBuilder.append(src).append(")").append("\n");
             jsonObject.put("content",contentBuilder.toString());
         }
         return jsonObject;

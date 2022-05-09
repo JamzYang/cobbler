@@ -18,7 +18,7 @@ public class ListParserTest {
     @Test
     public void testParseList(){
         String result = "- 有人认为，设计就是讨论要用什么技术实现功能；\n" +
-                "- 有人认为，设计就是设计模式；\n";
+                "- 有人认为，设计就是设计模式；\n\n";
         String testString ="<div class=\"se-4ea65bf9\" data-slate-type=\"list\" data-slate-object=\"block\" data-key=\"650\">\n" +
                 "    <div class=\"se-c63d9e19 se-033633fa\" data-slate-type=\"list-line\" data-slate-object=\"block\" data-key=\"651\">\n" +
                 "        <span data-slate-object=\"text\" data-key=\"652\">\n" +

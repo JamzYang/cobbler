@@ -25,15 +25,16 @@ public class HeadingParser extends BlockParser{
         StringBuilder contentBuilder = new StringBuilder();
         contentBuilder.append("### ");
         Elements h2 = getBlockElement().select("h2");
+        if(h2.size() < 1){
+            h2 = getBlockElement().select("h3");
+        }
         if(h2.hasAttr(EnumAttr.HEADING.getAttr())){
-
             Elements select = h2.select(SelectUtil.OBJECT_TEXT);
             for (Element element1 : select) {
                 ObjectTextParser objectTextParser = new ObjectTextParser(element1);
                 String text = objectTextParser.parseText();
                 contentBuilder.append(text);
             }
-
         }
         contentBuilder.append("\n");
         jsonObject.put("content",contentBuilder.toString());

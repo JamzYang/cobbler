@@ -25,7 +25,16 @@ public class HeadingParserTest {
         JSONObject parse = blockParser.parse();
         parse.getString("content");
         assertEquals("二级标题解析错误",result,parse.getString("content"));
-        System.out.println();
-
+    }
+    @Test
+    public void testParseHeading3(){
+        String result = "### 使用 Stream 简化集合操作\n";
+        String body = "<h3 class=\"se-c68fcb47\" data-slate-type=\"heading\" data-slate-object=\"block\" data-key=\"5367\"><span data-slate-object=\"text\" data-key=\"5368\"><span data-slate-leaf=\"true\" data-offset-key=\"5368:0\" data-first-offset=\"true\"><span data-slate-string=\"true\">使用 Stream 简化集合操作</span></span></span></h3>";
+        Document document = Jsoup.parseBodyFragment(body);
+        Element body1 = document.body();
+        BlockParser blockParser = BlockParser.createBlockParser(body1.child(0));
+        JSONObject parse = blockParser.parse();
+        parse.getString("content");
+        assertEquals("三级标题解析错误",result,parse.getString("content"));
     }
 }

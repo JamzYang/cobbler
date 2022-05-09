@@ -4,11 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 import org.junit.Test;
-
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -36,7 +33,6 @@ public class ParagraphParserTest {
         JSONObject parse = paragraphParser.parse(children.get(0));
 
         parse.getString("content");
-        assertEquals("段落内容解析错误",parse.getString("content"),result);
-        System.out.println();
+        assertEquals("段落内容解析错误",result,parse.getString("content"));
     }
 }

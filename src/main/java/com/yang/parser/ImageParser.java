@@ -1,6 +1,7 @@
 package com.yang.parser;
 
 import com.alibaba.fastjson.JSONObject;
+import com.yang.EnumAttr;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
@@ -17,8 +18,8 @@ public class ImageParser extends BlockParser{
         StringBuilder contentBuilder = new StringBuilder();
        contentBuilder.append("![alt](");
         Elements img = element.select("img");
-        if(img.hasAttr(dataSavepageSrc)){
-            String src = img.attr(dataSavepageSrc);
+        if(img.hasAttr(EnumAttr.IMAGE_SRC.getAttr())){
+            String src = img.attr(EnumAttr.IMAGE_SRC.getAttr());
             contentBuilder.append(src).append(")");
             jsonObject.put("content",contentBuilder.toString());
         }

@@ -30,8 +30,13 @@ public class Article {
 
 
     public void build() {
+        buildTitle();
         buildContent();
         buildComments();
+    }
+
+    private void buildTitle() {
+
     }
 
     private void buildComments() {
@@ -53,6 +58,7 @@ public class Article {
             list.add(blockParser.parse());
         }
         StringBuilder contentSB = new StringBuilder();
+        contentSB.append("# ").append(title).append("\n");
         list.forEach(item -> contentSB.append(item.getString("content")));
         this.content = contentSB;
     }

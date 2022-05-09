@@ -66,13 +66,4 @@ public class ObjectTextParser  extends TextParser{
         return jsonObject;
     }
 
-    public static void main(String[] args) {
-        StringBuilder contentBuilder = new StringBuilder("**好吧**");
-        String lastChar = contentBuilder.substring(contentBuilder.length() - 2, contentBuilder.length());
-        if(!"**".equals(contentBuilder.substring(contentBuilder.length()-2, contentBuilder.length()))){
-            contentBuilder.append("**");
-        }
-        String substring = contentBuilder.substring(0, 2);
-        System.out.println();
-    }
 }

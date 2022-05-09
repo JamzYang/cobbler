@@ -1,22 +1,25 @@
 package com.yang;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.yang.parser.CommentsBuilder;
 import com.yang.parser.HeadingParser;
 import com.yang.parser.ImageParser;
 import com.yang.parser.ListParser;
 import com.yang.parser.ParagraphParser;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
-import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 
-
-import java.io.*;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +38,6 @@ public class Cobbler {
     private String srcDir = "src/test/resources/src_articles";
     private String tarDir = "src/test/resources/tar_articles";
     private String articleName;
-    private Element stdCommentBlock;
 
 
     public void process() {
@@ -45,12 +47,13 @@ public class Cobbler {
                 File article = articleList[i];
                 this.articleName = article.getName();
                 loadArticle(article);
-                parseContent(doc);
-                Elements commentListElement = getCommentListElement(doc);
-                createStdCommentBlock(commentListElement);
+                StringBuilder contentSB = parseContent(doc);
 
                 List<Comment> commentList = grabComments();
-                replaceComments(commentListElement, commentList);
+                CommentsBuilder commentsBuilder = new CommentsBuilder();
+                StringBuilder comments = commentsBuilder.build(commentList);
+                contentSB.append(comments);
+                System.out.println(contentSB.toString());
 
                 File tarArticle = new File(this.tarDir + "/" + this.articleName);
                 if (!tarArticle.exists()) {
@@ -80,11 +83,7 @@ public class Cobbler {
         this.articleId = articleUrl.substring(41);
     }
 
-    private static String dataSlateString = "data-slate-string"; //true
-    private static String dateSlateObject = "data-slate-object"; //text 文本  //mark  标记
-    private static String dataSlateType = "data-slate-type"; //bold 加粗
-
-    private JSONObject parseContent(Document doc) {
+    private StringBuilder parseContent(Document doc) {
         Element app = doc.body().getElementById("app");
         Elements contentsElements = app.select("[data-slate-editor=true], [autocorrect=off]");
         if (contentsElements.size() != 1) {
@@ -114,169 +113,10 @@ public class Cobbler {
         }
         StringBuilder contentSB = new StringBuilder();
         list.forEach(item -> contentSB.append(item.getString("content")));
-        System.out.println(contentSB.toString());
-        Element element = blockElements.get(0);
-        List<Node> nodes = element.childNodes();
-        for (Node node : nodes) {
-            List<Node> nodes1 = node.childNodes();
-            for (Node node1 : nodes1) {
-                if (node1.hasAttr("data-slate-object")) {
-                    StringBuilder grafString = new StringBuilder();
-                    if ("text".equals(node1.attr("data-slate-object"))) {
-//                       node1.
-                        List<Node> nodes2 = node1.childNodes();
-                        for (Node node2 : nodes2) {
-                            if (node2.hasAttr("data-slate-leaf")) {
-                                List<Node> nodes3 = node2.childNodes();
-                                for (Node node3 : nodes3) {
-                                    if (node3.hasAttr("data-slate-string")) {
-                                        List<Node> nodes4 = node3.childNodes();
-                                        for (Node node4 : nodes4) {
-                                            if (node4 instanceof TextNode) {
-                                                TextNode textNode = (TextNode) node4;
-                                                String wholeText = textNode.getWholeText();
-                                                grafString.append(wholeText);
-                                            }
-                                        }
-                                    }
-
-                                }
-
-                            }
-                        }
-                    } else if ("block".equals(node1.attr("data-slate-object"))) {
-
-                    } else {
-                        throw new RuntimeException("行内文本未识别");
-                    }
-                    log.info("段落内容： {}", grafString.toString());
-                }
-
-            }
-            System.out.println();
-        }
-        String type = blockElements.attr("data-slate-type");
-        if ("paragraph".equals(type)) {
-
-        } else {
-            throw new RuntimeException("块未识别： ");
-        }
 //        select.s
-        return null;
+        return contentSB;
     }
 
-    //2.查找评论列表标签
-    // li > img(头像)
-    //    > div(评论框)
-    //      > div(评论人信息框)
-    //          > div(名字+日期)
-    //              > div(名字) > span 名字
-    //              > div 2019-02-23
-    //          > div(点赞块)
-    //              >div > i class=iconfont ~ span 点赞数
-    //      > div(评论) 内容
-    //      > div > span 展开   ~ i class= iconfont
-    //      > div(作者回复) > p 回复内容
-    private Elements getCommentListElement(Document doc) {
-        if (true) {
-            throw new RuntimeException("test");
-
-        }
-        log.debug("开始从Dom树中查找评论框...");
-        long start = System.currentTimeMillis();
-        Elements elements = doc.select(".iconfont");
-        Elements lis = null;
-        for (Element element : elements) {
-            Elements e1 = element.getElementsContainingText("写留言");
-            if (e1.size() > 0) {
-                Elements next = e1.next();
-                while (!next.is("ul")) {
-                    next = next.next();
-                }
-                lis = next.select("li");
-                break;
-            }
-        }
-        long end = System.currentTimeMillis();
-        log.debug("评论框已找到.\t 耗时: " + (end - start) / 1000.0 + "秒.");
-        return lis;
-    }
-
-    //3.生成标准评论框. 含评论置顶(如果有), 去除展开, 作者回复
-    private void createStdCommentBlock(Elements commentListElement) {
-        this.stdCommentBlock = commentListElement.first();
-        Element commentBlock = stdCommentBlock.child(1);
-        Element commentInfoBar = commentBlock.child(0);
-
-        if (commentBlock.childrenSize() > 2) { //大于2说明有'展开' '作者回复'
-            Element child = commentBlock.child(2);
-            //判断是不是展开块
-            if (child.childNodeSize() == 2 && child.select("span") != null && child.select("#iconfont") != null) {
-                commentBlock.child(2).remove();
-            }
-        }
-
-        //是'作者回复'就return
-        if (commentBlock.childrenSize() > 2) { //还大于2说明有'作者回复'
-            Elements replayBlock = commentBlock.select("div>p");
-            if (replayBlock.size() > 0 && replayBlock.html().startsWith("作者回复")) {
-                return;
-            }
-        }
-
-        //如果第一个评论里没'作者回复',就遍历找
-        for (Element commentEle : commentListElement) {
-            Elements replayBlock = commentEle.select("div>p");
-            if (replayBlock.size() > 0 && replayBlock.html().startsWith("作者回复")) {
-                Element replayEle = replayBlock.get(0);
-                replayEle.after(commentBlock.child(1));
-                return;
-            }
-        }
-    }
-
-    //4.修改评论
-    private void replaceComments(Elements commentListElement, List<Comment> commentList) {
-        int j = 0;
-        // li > img(头像)
-        //    > div(评论BOX)
-        //      > div(评论信息条)
-        //          > div(用户信息块)
-        //              > div(名字) > span 名字
-        //                          > span 置顶
-        //              > div 2019-02-23
-        //          > div(点赞块)
-        //              >div > i class=iconfont ~ span 点赞数
-        //      > div(评论) 内容
-        //      > div > span 展开   ~ i class= iconfont
-        //      > div(作者回复) > p 回复内容
-        commentListElement.clear();
-        for (Comment commentEntity : commentList) {
-            Element commentBlock = this.stdCommentBlock.clone();
-            Element avatarImg = commentBlock.child(0);
-            avatarImg.attr("src", commentEntity.getUser_header());
-            Element commentBox = commentBlock.child(1);
-            Element commentInfoBar = commentBox.child(0);
-            Element userInfoBlock = commentInfoBar.child(0);
-            userInfoBlock.child(0).child(0).html(commentEntity.getUser_name());
-            userInfoBlock.child(1).html(commentEntity.getComment_ctime());
-
-            Element likeBlock = commentInfoBar.child(0);
-            likeBlock.child(0).select("span").html(commentEntity.getLike_count());
-
-            Element comment = commentBox.child(1);
-            comment.html(commentEntity.getComment_content());
-            List<Replay> replies = commentEntity.getReplies();
-            if (replies != null && replies.size() > 0) {  //有 '作者回复'
-                Element reply = commentBox.child(2);
-                reply.select("p").html("作者: " + commentEntity.getReplies().get(0).getContent());
-            } else {//移除标准评论框中的 '作者回复'
-                commentBox.child(2).remove();
-            }
-            commentListElement.add(commentBlock);
-        }
-
-    }
 
     //post 抓取评论信息
     private List<Comment> grabComments() {
@@ -286,7 +126,7 @@ public class Cobbler {
         jsonOb.put("aid", articleId);
         jsonOb.put("prev", "0");
         List<Comment> commentList = doGetComments(jsonOb);
-        log.info("ping lun :  {}", JSON.toJSONString(commentList));
+        System.out.println(JSONObject.toJSONString(commentList));
         long end = System.currentTimeMillis();
         log.debug("耗时: " + (end - start) / 1000.0 + "秒.");
         log.debug("评论信息已抓取: " + commentList.size() + "条.\t 耗时: " + (end - start) / 1000.0 + "秒.");
@@ -295,14 +135,17 @@ public class Cobbler {
 
     private List<Comment> doGetComments(JSONObject jsonOb) {
         String jsonParam = jsonOb.toJSONString();
-        JSONObject resJson = JSONObject.parseObject(postJson(commentsUrl, jsonParam, articleUrl));
+        String respResult = postJson(commentsUrl, jsonParam, articleUrl);
+        if(StringUtils.isBlank(respResult)){
+            throw new RuntimeException("获取评论信息失败");
+        }
+        JSONObject resJson = JSONObject.parseObject(respResult);
         JSONObject data = resJson.getJSONObject("data");
         List<Comment> commentList = new ArrayList<>(data.getJSONArray("list").toJavaList(Comment.class));
         boolean hasMore = data.getJSONObject("page").getBoolean("more");
         while (hasMore) {
             jsonOb.put("prev", commentList.get(commentList.size() - 1).getScore());
-            jsonParam = jsonOb.toJSONString();
-            resJson = JSONObject.parseObject(postJson(commentsUrl, jsonParam, articleUrl));
+            resJson = JSONObject.parseObject(respResult);
             data = resJson.getJSONObject("data");
             commentList.addAll(data.getJSONArray("list").toJavaList(Comment.class));
             hasMore = data.getJSONObject("page").getBoolean("more");

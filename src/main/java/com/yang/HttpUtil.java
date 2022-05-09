@@ -1,5 +1,6 @@
 package com.yang;
 
+import lombok.extern.log4j.Log4j2;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -14,9 +15,10 @@ import java.io.IOException;
  * @author yang
  * Date 2020/3/25 0:59
  */
+@Log4j2
 public class HttpUtil {
     public static String postJson(String url, String json, String referer) {
-        String returnValue = "接口调用失败";
+        String returnValue = null;
         CloseableHttpClient httpClient = HttpClients.createDefault();
         try {
             httpClient = HttpClients.createDefault();
@@ -33,7 +35,7 @@ public class HttpUtil {
                 returnValue = EntityUtils.toString(entity, "utf-8");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("post error",e);
         } finally {
             try {
                 httpClient.close();

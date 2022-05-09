@@ -21,9 +21,8 @@ public class HeadingParserTest {
                 "</h2>";
         Document document = Jsoup.parseBodyFragment(body);
         Element body1 = document.body();
-        BlockParser parser = new HeadingParser(body1);
-
-        JSONObject parse = parser.parse();
+        BlockParser blockParser = BlockParser.createBlockParser(body1.child(0));
+        JSONObject parse = blockParser.parse();
         parse.getString("content");
         assertEquals("二级标题解析错误",result,parse.getString("content"));
         System.out.println();

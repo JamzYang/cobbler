@@ -17,9 +17,9 @@ public class ImageParserTest {
                 "</div>";
         Document document = Jsoup.parseBodyFragment(body);
         Element body1 = document.body();
-        ImageParser imageParser = new ImageParser(body1);
+        BlockParser blockParser = BlockParser.createBlockParser(body1.child(0));
 
-        JSONObject parse = imageParser.parse();
+        JSONObject parse = blockParser.parse();
         parse.getString("content");
         assertEquals("图片内容解析错误",parse.getString("content"),result);
         System.out.println();

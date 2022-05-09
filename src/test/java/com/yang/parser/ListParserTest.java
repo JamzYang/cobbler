@@ -39,7 +39,8 @@ public class ListParserTest {
         Document document = Jsoup.parseBodyFragment(testString);
         Element body = document.body();
         Elements children = body.children();
-        BlockParser listParser = new ListParser(children.get(0));
+        BlockParser listParser = BlockParser.createBlockParser(children.get(0));
+
         JSONObject parse = listParser.parse();
 
         parse.getString("content");

@@ -17,6 +17,7 @@ public enum EnumAttr {
     LIST("data-slate-type","list"),
     IMAGE("data-slate-type","image"),
     HEADING("data-slate-type","heading"),
+    CODE("data-slate-type","pre"),
 
     LIST_LINE("data-slate-type","list-line"),
 
@@ -28,6 +29,7 @@ public enum EnumAttr {
 
 
     IMAGE_SRC("data-savepage-src",""),
+    CODE_LANGUAGE("data-code-language",""),
     ;
     private String attr;
     private String value;

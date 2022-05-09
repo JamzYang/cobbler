@@ -4,7 +4,9 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import static org.junit.Assert.*;
+import java.util.Collection;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author yang
@@ -15,8 +17,8 @@ public class CobblerTest {
     @Test
     public void getLocalArticleList() throws IOException {
         Cobbler cobbler = new Cobbler();
-        File[] articleList = cobbler.getLocalArticleList("src/test/resources/src_articles");
-        assertEquals(1,articleList.length);
+        Collection<File> localArticleList = cobbler.getLocalArticleList("src/test/resources/src_articles");
+        assertEquals(3,localArticleList.size());
     }
 
     @Test

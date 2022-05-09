@@ -26,8 +26,10 @@ public abstract class BlockParser implements Parser {
             return new ListParser(blockElement);
         } else if (blockElement.is(SelectUtil.IMAGE)) {
             return new ImageParser(blockElement);
+        } else if (blockElement.is(SelectUtil.CODE)) {
+            return new CodeParser(blockElement);
         } else {
-            throw new RuntimeException("未识别的 block");
+            throw new RuntimeException("未识别的 block ===> " + blockElement.getClass());
         }
     }
 }

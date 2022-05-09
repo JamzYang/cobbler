@@ -28,6 +28,7 @@ public class OjectTextParserTest {
         Document document = Jsoup.parseBodyFragment(testString);
         Element body = document.body();
         Elements children = body.children();
+
         ObjectTextParser textParser = new ObjectTextParser(children.get(0));
         String text = textParser.parseText();
 

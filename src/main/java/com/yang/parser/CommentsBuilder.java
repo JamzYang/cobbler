@@ -53,9 +53,14 @@ public class CommentsBuilder {
 
     //post 抓取评论信息
     private List<Comment> grabComments() {
+        if(true){
+            return new ArrayList<>();
+        }
+
         if(CollectionUtils.isNotEmpty(article.getCommentList())){
             return article.getCommentList(); //todo
         }
+
         log.debug("开始抓取评论信息...");
         long start = System.currentTimeMillis();
         JSONObject jsonOb = new JSONObject();
@@ -82,6 +87,8 @@ public class CommentsBuilder {
         boolean hasMore = data.getJSONObject("page").getBoolean("more");
         while (hasMore) {
             jsonOb.put("prev", commentList.get(commentList.size() - 1).getScore());
+
+            respResult = postJson(commentsUrl, jsonOb.toJSONString(), article.getArticleUrl());
             resJson = JSONObject.parseObject(respResult);
             data = resJson.getJSONObject("data");
             commentList.addAll(data.getJSONArray("list").toJavaList(Comment.class));

@@ -79,7 +79,8 @@ public class ParagraphParserTest {
         Document document = Jsoup.parseBodyFragment(testString);
         Element body = document.body();
         Elements children = body.children();
-        ParagraphParser paragraphParser = new ParagraphParser(children.get(0));
+
+        BlockParser paragraphParser = BlockParser.createBlockParser(children.get(0));
         JSONObject parse = paragraphParser.parse();
 
         parse.getString("content");

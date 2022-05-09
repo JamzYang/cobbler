@@ -3,6 +3,8 @@ package com.yang;
 import lombok.Data;
 import org.jsoup.nodes.Document;
 
+import java.util.List;
+
 /**
  * @author yangshen47
  * @description
@@ -12,6 +14,8 @@ import org.jsoup.nodes.Document;
 public class Article {
     private String articleUrl;
     private String articleId;
+
+    private List<Comment> commentList;
     private StringBuilder content;
     private StringBuilder comments;
 

@@ -18,6 +18,7 @@ public enum EnumAttr {
     IMAGE("data-slate-type","image"),
     HEADING("data-slate-type","heading"),
     CODE("data-slate-type","pre"),
+    BLOCK_QUOTE("data-slate-type","block-quote"),
 
     LIST_LINE("data-slate-type","list-line"),
 

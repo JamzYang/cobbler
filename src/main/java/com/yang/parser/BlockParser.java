@@ -28,8 +28,12 @@ public abstract class BlockParser implements Parser {
             return new ImageParser(blockElement);
         } else if (blockElement.is(SelectUtil.CODE)) {
             return new CodeParser(blockElement);
+        } else if (blockElement.is(SelectUtil.BLOCK_QUOTE)) {
+            return new BlockQuoteParser(blockElement);
+        } else if (blockElement.is(SelectUtil.BLOCK_HR)) {
+            return new BlockHrParser(blockElement);
         } else {
-            throw new RuntimeException("未识别的 block ===> " + blockElement.getClass());
+            throw new RuntimeException("未识别的 block ===> class=" + blockElement.attr("class"));
         }
     }
 }

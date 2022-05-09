@@ -18,7 +18,8 @@ import java.util.Collection;
  */
 @Log4j2
 public class Cobbler {
-    private static String srcDir = "src/test/resources/src_articles";
+//    private static String srcDir = "src/test/resources/src_articles";
+    private static String srcDir = "/Users/yangshen47/Downloads/归档/学习资料/119-Java 业务开发常见错误 100 例";
 
     public static void main(String[] args) {
         Cobbler cobbler = new Cobbler();

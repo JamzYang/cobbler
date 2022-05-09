@@ -28,10 +28,15 @@ public class CodeParser extends BlockParser{
         String attr = getBlockElement().attr(EnumAttr.CODE_LANGUAGE.getAttr());
         contentBuilder.append("```").append(getBlockElement().attr(EnumAttr.CODE_LANGUAGE.getAttr())).append("\n");
         Elements previewElements = getBlockElement().select(SelectUtil.CODE_PREVIEW);
+        Elements codeLineElements;
         if(previewElements.size() != 1) {
-            throw new RuntimeException("代码块元素数量异常");
+            codeLineElements = getBlockElement().select(SelectUtil.CODE_LINE);
+            if(codeLineElements.size() < 1){
+                throw new RuntimeException("代码块元素数量异常");
+            }
+        }else {
+            codeLineElements = previewElements.get(0).children();
         }
-        Elements codeLineElements = previewElements.get(0).children();
         for (Element codeLineElement : codeLineElements) {
             Elements stringElements = codeLineElement.select("[data-slate-string=true]");
             for (Element stringElement : stringElements) {

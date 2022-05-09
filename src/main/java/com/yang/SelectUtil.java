@@ -11,6 +11,8 @@ public class SelectUtil {
     public static final String LIST = String.format("[%s=%s]", EnumAttr.LIST.getAttr(), EnumAttr.LIST.getValue());
     public static final String IMAGE = String.format("[%s=%s]", EnumAttr.IMAGE.getAttr(), EnumAttr.IMAGE.getValue());
     public static final String CODE = String.format("[%s=%s]", EnumAttr.CODE.getAttr(), EnumAttr.CODE.getValue());
+    public static final String BLOCK_QUOTE = String.format("[%s=%s]", EnumAttr.BLOCK_QUOTE.getAttr(), EnumAttr.BLOCK_QUOTE.getValue());
+    public static final String BLOCK_HR = "[data-slate-type=hr]";
 
     public static final String CODE_PREVIEW = "[data-origin=pm_code_preview]";
     public static final String CODE_LINE = "[data-slate-type=code-line]";

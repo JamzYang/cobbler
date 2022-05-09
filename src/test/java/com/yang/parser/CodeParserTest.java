@@ -37,4 +37,25 @@ public class CodeParserTest {
         System.out.println();
 
     }
+
+
+    @Test
+    public void testParseCodeNoPreviewAttr(){
+        String result = "```\n" +
+                "<dependency>\n" +
+                "    <groupId>org.springframework.boot</groupId>\n" +
+                "    <artifactId>spring-boot-starter-actuator</artifactId>\n" +
+                "</dependency>\n" +
+                "```\n";
+
+        String body = "<div class=\"se-e47dbe45\" data-slate-type=\"pre\" data-slate-object=\"block\" data-key=\"11087\"><div class=\"se-1c7c6838 se-190c89dc\"><span></span></div><div class=\"se-c356aa35\"><div class=\"se-2cb259e2 se-ea6d02c6\" data-code-line-number=\"1\"></div><div class=\"se-2cb259e2 se-ea6d02c6\" data-code-line-number=\"2\"></div><div class=\"se-2cb259e2 se-ea6d02c6\" data-code-line-number=\"3\"></div><div class=\"se-2cb259e2 se-ea6d02c6\" data-code-line-number=\"4\"></div></div><div class=\"se-48224f1c ps ps--active-x\"><div class=\"se-8f3f414d se-c1afbca7\" data-slate-type=\"code-line\" data-slate-object=\"block\" data-key=\"11088\"><span data-slate-object=\"text\" data-key=\"11089\"><span data-slate-leaf=\"true\" data-offset-key=\"11089:0\" data-first-offset=\"true\"><span data-slate-string=\"true\">&lt;dependency&gt;</span></span></span></div><div class=\"se-8f3f414d se-c1afbca7\" data-slate-type=\"code-line\" data-slate-object=\"block\" data-key=\"11090\"><span data-slate-object=\"text\" data-key=\"11091\"><span data-slate-leaf=\"true\" data-offset-key=\"11091:0\" data-first-offset=\"true\"><span data-slate-string=\"true\">    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span></span></span></div><div class=\"se-8f3f414d se-c1afbca7\" data-slate-type=\"code-line\" data-slate-object=\"block\" data-key=\"11092\"><span data-slate-object=\"text\" data-key=\"11093\"><span data-slate-leaf=\"true\" data-offset-key=\"11093:0\" data-first-offset=\"true\"><span data-slate-string=\"true\">    &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;</span></span></span></div><div class=\"se-8f3f414d se-c1afbca7\" data-slate-type=\"code-line\" data-slate-object=\"block\" data-key=\"11094\"><span data-slate-object=\"text\" data-key=\"11095\"><span data-slate-leaf=\"true\" data-offset-key=\"11095:0\" data-first-offset=\"true\"><span data-slate-string=\"true\">&lt;/dependency&gt;</span></span></span></div><div class=\"ps__rail-x\" style=\"width: 365px; left: 0px; bottom: 0px;\"><div class=\"ps__thumb-x\" tabindex=\"0\" style=\"left: 0px; width: 300px;\"></div></div><div class=\"ps__rail-y\" style=\"top: 0px; right: 0px;\"><div class=\"ps__thumb-y\" tabindex=\"0\" style=\"top: 0px; height: 0px;\"></div></div></div></div>";
+        Document document = Jsoup.parseBodyFragment(body);
+        Element body1 = document.body();
+        BlockParser parser = BlockParser.createBlockParser(body1.child(0));
+        JSONObject parse = parser.parse();
+        parse.getString("content");
+        assertEquals("代码块解析错误",result,parse.getString("content"));
+
+
+    }
 }

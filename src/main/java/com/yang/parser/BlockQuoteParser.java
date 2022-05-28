@@ -36,7 +36,7 @@ public class BlockQuoteParser extends BlockParser {
                 Node node = stringElement.childNode(0);
                 contentBuilder.append(((TextNode)node).getWholeText()).append("\n");
             }
-            contentBuilder.append(">").append("\n");
+            contentBuilder.append(">").append("\n\n");
         }
         jsonObject.put("content",contentBuilder.toString());
         return jsonObject;
